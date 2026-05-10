@@ -1,0 +1,5 @@
+ultralytics>=8.0.0
+numpy
+opencv-python
+requests
+dashscope>=1.14.0

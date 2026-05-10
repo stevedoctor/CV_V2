@@ -1,0 +1,91 @@
+Step 1: 基础姿态估计 - ✅ Done
+- YOLO-Pose ✅
+- ByteTrack跟踪 ✅
+- 10帧滑动窗口 ✅
+- 大模型审计框架 ✅
+Step 2: 思路二（规则引擎） - Let me check each sub-step:
+- 2.1 RFAC四维度指标计算:
+  - Apathy: 正视率 ✅
+  - Fatigue: 低头频次 ✅ (not 眨眼检测, but body sway added)
+  - Rushing: 躯干速度 + 手势活跃度 ✅
+  - Frustration: 肢体对抗性 ✅
+  
+- 2.2 规则阈值分级引擎: ✅
+  - All four dimensions have 0-3 level thresholds
+  
+- 2.3 大模型研判模块: ✅
+  - VLM audit with multi-threading ✅
+  - Ollama + SiliconFlow ✅
+  - 综合判断输出 + 干预建议 ✅
+So Step 2 is essentially COMPLETE.
+Step 3: 思路三（端到端大模型） - Let me check:
+- 3.1 视频帧采样模块: ✅ (FrameSampler in route2)
+- 3.2 多模态大模型调用: ✅ (SiliconFlow + Ollama in route2)
+- 3.3 Prompt模板设计: ✅ (RFAC individual/global prompts in route2)
+- Plus: ByteTrack tracking + individual cropping + multi-threading ✅
+- Plus: Result aggregation + report generation ✅
+- Plus: Frame annotation visualization ✅
+So Step 3 is also essentially COMPLETE (with enhancements).
+Step 4: 构建训练数据集 - NOT started
+Step 5: 实现思路一（CNN-LSTM） - NOT started
+Step 6: 系统集成与优化 - Partially done (we have both routes working)
+The "少许改良" (minor improvements) include:
+1. Replaced qwen direct API with SiliconFlow API
+2. Added multi-threading to both route1 and route2
+3. Fixed JSON parsing (think tags, nested braces)
+4. Added frame annotation visualization
+5. Added ByteTrack to route2 for individual tracking
+So we're effectively at the end of Step 3, ready for Step 4.
+当前进度定位
+对照原计划，逐步骤盘点：
+步骤1: 基础姿态估计 — ✅ 已完成
+子项
+YOLO-Pose姿态估计
+ByteTrack跨帧跟踪
+滑动窗口平滑
+大模型审计框架
+---
+步骤2: 思路二（规则引擎）— ✅ 已完成
+子项	状态	改良点
+2.1 RFAC四维度指标	✅	Fatigue用身体摇摆替代眨眼检测；添加姿态不稳/前倾角
+2.2 规则阈值分级引擎	✅	0-3级四维+综合分级，权重A(55%)F(25%)R(15%)Fr(5%)
+2.3 大模型研判模块	✅	多线程并发审计（改良）、SiliconFlow替换阿里云直连（改良）
+📦 交付物: route1/ 完整运行
+---
+步骤3: 思路三（端到端大模型）— ✅ 已完成（+改良）
+子项	状态	改良点
+3.1 视频帧采样	✅	均匀+关键帧采样
+3.2 多模态大模型调用	✅	SiliconFlow + Ollama，think标签解析+大括号配对JSON
+3.3 Prompt模板	✅	个体分析+全局分析双模板
+额外改良（原计划没有的）：
+改良项	说明
+ByteTrack个体追踪	原计划3.3只说"帧采样+VLM"，实际增加了检测+跟踪+个体裁剪
+多线程并行	route2核心：ThreadPoolExecutor，4线程并发VLM分析
+个体裁剪ROI	按bbox+padding裁剪单人送VLM，而非整帧   
+结果聚合+报告	AnalysisReport + JSON导出
+帧标注可视化	检测框+等级+RFAC评分+输出视频
+📦 交付物: route2/ 完整运行
+---
+步骤4: 构建训练数据集 — ❌ 未开始
+这是下一步。
+---
+步骤5: 思路一（CNN-LSTM）— ❌ 未开始
+依赖步骤4的数据集。
+---
+步骤6: 系统集成与优化 — ⚠️ 部分完成
+子项
+思路二 vs 思路三 对比
+实时性能优化
+TensorRT加速
+API文档/用户手册
+---
+时间线重绘
+步骤1: 基础     ██ ✅ 完成
+步骤2: 思路二   ████ ✅ 完成（+多线程+SiliconFlow改良）
+步骤3: 思路三   ████ ✅ 完成（+个体追踪+多线程+裁剪改良）
+         ↓
+步骤4: 数据集   ████████ ⬅️ 当前位置（第6-8周）
+         ↓
+步骤5: 思路一   ████████████ 
+         ↓
+步骤6: 集成     ██████
