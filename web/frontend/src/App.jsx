@@ -60,8 +60,8 @@ function App() {
   }, [activeTaskId])
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    if (file) setUploadFile(file)
+    const filePath = e.target.value
+    if (filePath) setUploadFile({ name: filePath })
   }
 
   const handleUpload = async () => {
@@ -137,14 +137,18 @@ function App() {
       <main className="main">
         <aside className="sidebar">
           <div className="card">
-            <div className="card-title">上传视频</div>
+            <div className="card-title">本地视频路径</div>
             <div className="upload-zone">
-              <div className="icon">📹</div>
-              <p>{uploadFile ? uploadFile.name : '点击或拖拽视频文件'}</p>
-              <input type="file" accept=".mp4,.avi,.mov" onChange={handleFileChange} style={{ marginTop: 8 }} />
+              <input
+                type="text"
+                value={uploadFile ? uploadFile.name : ''}
+                onChange={handleFileChange}
+                placeholder="输入本地视频文件路径，如 /home/user/video.mp4"
+                style={{ width: '100%', padding: '8px', fontSize: 12 }}
+              />
             </div>
             <button className="btn btn-primary" onClick={handleUpload} disabled={!uploadFile || uploading} style={{ marginTop: 12 }}>
-              {uploading ? '上传中...' : '开始分析'}
+              {uploading ? '提交中...' : '开始分析'}
             </button>
           </div>
 
