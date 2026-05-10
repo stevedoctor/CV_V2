@@ -1,58 +1,42 @@
 """
-视频分析路由 - 上传 + 创建任务
+视频分析路由 - 任务创建（文件路径模式）
 """
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 import os
 import uuid
-import shutil
 
 from models.database import Task, TaskStatus, get_db_path
 
 router = APIRouter(prefix="/analysis", tags=["视频分析"])
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-UPLOAD_DIR = os.path.join(BASE_DIR, "data", "videos")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-
 @router.post("/upload")
-async def upload_video(
-    file: UploadFile = File(...),
-    route: str = Form("route1"),
-    vlm_provider: str = Form("none"),
-    vlm_trigger: str = Form("MODERATE"),
-    vlm_api_key: str = Form(""),
-    vlm_model: str = Form(""),
-    workers: int = Form(4),
-    submitted_by: str = Form("anonymous"),
-):
+async def upload_video(data: dict):
     """
-    上传视频文件，创建任务
-    
+    前端传入本地文件路径，创建任务
     返回 task_id，前端用这个ID追踪进度
     """
-    if not file.filename.endswith(('.mp4', '.avi', '.mov', '.mkv')):
-        raise HTTPException(status_code=400, detail="仅支持 mp4/avi/mov/mkv")
-    
+    video_path = data.get("video_path", "")
+    route = data.get("route", "route1")
+    vlm_provider = data.get("vlm_provider", "none")
+    vlm_trigger = data.get("vlm_trigger", "MODERATE")
+    vlm_api_key = data.get("vlm_api_key", "")
+    vlm_model = data.get("vlm_model", "")
+    workers = data.get("workers", 4)
+
+    if not video_path:
+        raise HTTPException(status_code=400, detail="video_path 不能为空")
+
     task_id = str(uuid.uuid4())
-    
-    safe_name = f"{task_id}_{file.filename}"
-    video_path = os.path.join(UPLOAD_DIR, safe_name)
-    
-    with open(video_path, 'wb') as f:
-        shutil.copyfileobj(file.file, f)
-    
-    file_size = os.path.getsize(video_path)
-    
+
     engine = create_engine(f"sqlite:///{get_db_path()}")
     with Session(engine) as s:
         task = Task(
             task_id=task_id,
-            video_name=file.filename,
+            video_name=os.path.basename(video_path),
             video_path=video_path,
             route=route,
             vlm_provider=vlm_provider,
@@ -61,19 +45,17 @@ async def upload_video(
             vlm_model=vlm_model,
             workers=workers,
             status=TaskStatus.PENDING,
-            submitted_by=submitted_by,
         )
         s.add(task)
         s.commit()
         s.refresh(task)
-    
+
     return {
         "task_id": task_id,
-        "video_name": file.filename,
+        "video_name": os.path.basename(video_path),
         "video_path": video_path,
-        "file_size": file_size,
         "status": "pending",
-        "message": "视频上传成功，任务已创建，等待本地client执行",
+        "message": "任务已创建，本地client执行分析",
     }
 
 

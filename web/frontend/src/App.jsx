@@ -65,19 +65,19 @@ function App() {
   }
 
   const handleUpload = async () => {
-    if (!uploadFile) return
+    const filePath = uploadFile ? uploadFile.name : ''
+    if (!filePath) return
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', uploadFile)
-      formData.append('route', selectedRoute)
-      formData.append('vlm_provider', vlmConfig.provider || 'none')
-      formData.append('vlm_trigger', vlmConfig.trigger || 'MODERATE')
-      formData.append('vlm_api_key', vlmConfig.api_key || '')
-      formData.append('vlm_model', vlmConfig.model || '')
-      formData.append('workers', vlmConfig.max_workers || 4)
-
-      const data = await uploadVideo(formData)
+      const data = await uploadVideo({
+        video_path: filePath,
+        route: selectedRoute,
+        vlm_provider: vlmConfig.provider || 'none',
+        vlm_trigger: vlmConfig.trigger || 'MODERATE',
+        vlm_api_key: vlmConfig.api_key || '',
+        vlm_model: vlmConfig.model || '',
+        workers: vlmConfig.max_workers || 4,
+      })
       setActiveTaskId(data.task_id)
       setProgress(0)
       setResult(null)

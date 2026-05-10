@@ -1,16 +1,14 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://121.41.192.58'
 
 const api = axios.create({
   baseURL: API_BASE,
   timeout: 30000,
 })
 
-export const uploadVideo = async (formData) => {
-  const response = await api.post('/api/analysis/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+export const uploadVideo = async (data) => {
+  const response = await api.post('/api/analysis/upload', data)
   return response.data
 }
 
