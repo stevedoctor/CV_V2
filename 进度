@@ -66,8 +66,27 @@ ByteTrack个体追踪	原计划3.3只说"帧采样+VLM"，实际增加了检测+
 帧标注可视化	检测框+等级+RFAC评分+输出视频
 📦 交付物: route2/ 完整运行
 ---
-步骤4: 构建训练数据集 — ❌ 未开始
-这是下一步。
+步骤4: 构建训练数据集 — 🔧 进行中
+
+4.0 代码修复 ✅
+  - train.py: 删除3处重复 import torch.nn.functional as F，默认设备改为cuda+自动回退
+  - train.py: CrossEntropyLoss → FocalLoss(alpha=class_weights, gamma=2.0) 应对类别不平衡
+  - rule_engine.py: RuleResult 字段修复 (torso_velocity→rushing_value 等，route1+route3同步)
+  - dataset_builder.py: 划分逻辑从按视频源→随机混合 70/15/15
+
+4.1 数据集重新划分 ✅
+  - 1592 clips 随机混合划分 (seed=42)
+  - train: 1114 clips (video1=211, video2=903) → 8135 person-clips
+  - val: 239 clips (video1=52, video2=187) → 1726 person-clips
+  - test: 239 clips (video1=46, video2=193) → 1724 person-clips
+  - 各集标签分布一致: NORMAL≈54%, MILD≈28%, MODERATE≈17%, SEVERE≈0.7%
+
+4.2 VLM复核 ⏳ 待执行
+4.3 数据增强验证 ⏳
+4.4 CNN-LSTM训练 ⏳
+4.5 模型评估与集成 ⏳
+📦 交付物: route3/checkpoints/best_model.pth + 集成EnsemblePredictor
+
 ---
 步骤5: 思路一（CNN-LSTM）— ❌ 未开始
 依赖步骤4的数据集。

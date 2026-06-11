@@ -1,7 +1,7 @@
 """
 数据库模型 - SQLite任务记录
 """
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Enum as SQLEnum, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 import enum
@@ -40,7 +40,9 @@ class Task(Base):
     vlm_trigger = Column(String(16), default="MODERATE")
     vlm_api_key = Column(String(256), default="")
     vlm_model = Column(String(128), default="")
-    
+    ollama_host = Column(String(256), default="http://localhost:11434")
+    ollama_model = Column(String(128), default="qwen3-vl:8b")
+
     workers = Column(Integer, default=4)
     
     progress = Column(Float, default=0.0)
@@ -67,6 +69,9 @@ class Task(Base):
             "progress_message": self.progress_message,
             "vlm_provider": self.vlm_provider,
             "vlm_trigger": self.vlm_trigger,
+            "vlm_model": self.vlm_model,
+            "ollama_host": self.ollama_host,
+            "ollama_model": self.ollama_model,
             "workers": self.workers,
             "result": self.result_json,
             "error": self.error_message,
@@ -82,8 +87,16 @@ def get_db_path() -> str:
 def init_db():
     import os
     os.makedirs(os.path.dirname(get_db_path()), exist_ok=True)
-    
+
     from sqlalchemy import create_engine
     engine = create_engine(f"sqlite:///{get_db_path()}")
     Base.metadata.create_all(engine)
+
+    with engine.begin() as conn:
+        columns = {row[1] for row in conn.execute(text("PRAGMA table_info(tasks)"))}
+        if "ollama_host" not in columns:
+            conn.execute(text("ALTER TABLE tasks ADD COLUMN ollama_host VARCHAR(256) DEFAULT 'http://localhost:11434'"))
+        if "ollama_model" not in columns:
+            conn.execute(text("ALTER TABLE tasks ADD COLUMN ollama_model VARCHAR(128) DEFAULT 'qwen3-vl:8b'"))
+
     return engine

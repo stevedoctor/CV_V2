@@ -196,11 +196,10 @@ class RuleEngine:
         """
         result = RuleResult()
         
-        # 保存原始值
-        result.torso_velocity = rfac_score.torso_velocity
-        result.head_down_ratio = rfac_score.head_down_ratio
-        result.forward_rate = rfac_score.forward_rate
-        result.gesture_activity = rfac_score.gesture_activity
+        result.rushing_value = rfac_score.torso_velocity
+        result.fatigue_value = rfac_score.head_down_ratio
+        result.apathy_value = rfac_score.forward_rate
+        result.frustration_value = rfac_score.gesture_activity
         
         # 计算各维度等级
         result.rushing_level = self.evaluate_rushing(rfac_score.torso_velocity)

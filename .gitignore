@@ -26,3 +26,8 @@ web/frontend/node_modules/
 web/frontend/dist/
 web/backend/__pycache__/
 web/backend/data/
+面试用/
+.mcp.json
+.DS_Store
+.env
+*.egg-info/

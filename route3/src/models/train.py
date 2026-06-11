@@ -6,7 +6,6 @@ CNN-LSTM 训练脚本
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from typing import Dict
@@ -62,9 +61,6 @@ class FocalLoss(nn.Module):
         elif self.reduction == 'sum':
             return focal.sum()
         return focal
-
-
-import torch.nn.functional as F
 
 
 def train_one_epoch(model: AttentionLSTM,
@@ -190,8 +186,14 @@ def evaluate(model: AttentionLSTM,
 
 
 def train(config: dict):
-    device = torch.device(config.get("device", "cpu"))
+    device_str = config.get("device", "cuda")
+    if device_str == "cuda" and not torch.cuda.is_available():
+        print("CUDA不可用，回退到CPU")
+        device_str = "cpu"
+    device = torch.device(device_str)
     print(f"设备: {device}")
+    if device.type == "cuda":
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
     
     train_loader, val_loader, test_loader = create_dataloaders(
         dataset_dir=config["dataset_dir"],
@@ -223,8 +225,8 @@ def train(config: dict):
     class_weights = compute_class_weights(train_loader.dataset).to(device)
     print(f"类别权重: {class_weights.tolist()}")
     
-    frame_criterion = nn.CrossEntropyLoss(weight=class_weights, ignore_index=-1)
-    clip_criterion = nn.CrossEntropyLoss(weight=class_weights)
+    frame_criterion = FocalLoss(alpha=class_weights, gamma=2.0)
+    clip_criterion = FocalLoss(alpha=class_weights, gamma=2.0)
     
     optimizer = optim.AdamW(
         model.parameters(),
@@ -328,7 +330,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--patience", type=int, default=10)
-    parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--spatial-dim", type=int, default=128)
     parser.add_argument("--lstm-hidden", type=int, default=64)
     parser.add_argument("--lstm-layers", type=int, default=2)

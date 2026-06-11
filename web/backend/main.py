@@ -50,13 +50,18 @@ def root():
         "version": "1.0.0",
         "status": "running",
         "endpoints": {
-            "POST /api/tasks": "提交新分析任务",
+            "POST /api/analysis/upload": "提交新分析任务",
             "GET /api/tasks": "获取任务列表",
             "GET /api/tasks/{task_id}": "获取任务详情",
             "GET /api/jobs/next": "本地client获取下一个待执行任务",
             "WS /ws/{task_id}": "WebSocket实时进度",
         }
     }
+
+
+@app.get("/api/jobs/next")
+def get_next_job():
+    return websocket.claim_next_job()
 
 
 @app.get("/health")

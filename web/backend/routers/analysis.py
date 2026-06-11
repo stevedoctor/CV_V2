@@ -25,6 +25,8 @@ async def upload_video(data: dict):
     vlm_trigger = data.get("vlm_trigger", "MODERATE")
     vlm_api_key = data.get("vlm_api_key", "")
     vlm_model = data.get("vlm_model", "")
+    ollama_host = data.get("ollama_host", "http://localhost:11434")
+    ollama_model = data.get("ollama_model", "qwen3-vl:8b")
     workers = data.get("workers", 4)
 
     if not video_path:
@@ -43,6 +45,8 @@ async def upload_video(data: dict):
             vlm_trigger=vlm_trigger,
             vlm_api_key=vlm_api_key,
             vlm_model=vlm_model,
+            ollama_host=ollama_host,
+            ollama_model=ollama_model,
             workers=workers,
             status=TaskStatus.PENDING,
         )
